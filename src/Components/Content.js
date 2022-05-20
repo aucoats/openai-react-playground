@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+const { Configuration, OpenAIApi } = require("openai");
 
 // fetch("https://api.openai.com/v1/engines/text-curie-001/completions", {
 //  method: "POST",
@@ -22,9 +23,14 @@ import React, { useState } from "react";
 
 function Content() {
 
-    // const api = 'https://api.openai.com/v1/engines/text-curie-001/completions';
+    // Setting up API config
     const API_KEY = process.env.REACT_APP_MY_SECRET_API_KEY;
+    const configuration = new Configuration({
+        apiKey: API_KEY,
+      });
 
+    const openai = new OpenAIApi(configuration);
+  
     const [paramForm, setParamForm] = useState({
         prompt: "", 
         temperature: .7, 
@@ -40,14 +46,16 @@ function Content() {
     }
     
     async function handleFetch(params) {
-        const data = await fetch("https://api.openai.com/v1/engines/text-curie-001/completions", {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${API_KEY}`,
-            },
-            body: JSON.stringify(params),
-            })
+        const data = await openai.createCompletion("text-curie-001", params);
+        
+        // await fetch("https://api.openai.com/v1/engines/text-curie-001/completions", {
+        //     method: "POST",
+        //     headers: {
+        //     "Content-Type": "application/json",
+        //     Authorization: `Bearer ${API_KEY}`,
+        //     },
+        //     body: JSON.stringify(params),
+        //     })
 
         console.log(data);
             
@@ -61,14 +69,22 @@ function Content() {
     }
 
     return (
-        <div className="container text-center">
-            <form>
-                <label className="align-self-start m-1">Enter prompt below</label><br></br>
-                <textarea id="promptArea" name="prompt" className="align-self-center" onChange={(e) => handlePromptBlur(e)}></textarea><br></br>
-                <button type="submit" className="btn btn-primary"
-                    onClick={(e) => handleClick(e)}>Submit</button>
-            </form>
-        </div>
+        <>
+            <div className="container text-center">
+                <form>
+                    <label className="align-self-start m-1">Enter prompt below</label><br></br>
+                    <textarea id="promptArea" name="prompt" className="align-self-center" onChange={(e) => handlePromptBlur(e)}></textarea><br></br>
+                    <button type="submit" className="btn btn-primary"
+                        onClick={(e) => handleClick(e)}>Submit</button>
+                </form>
+            </div>
+            <div className="container text-left"> 
+                <h1>Responses</h1>
+            </div>
+            <div id="response-area" className="container text-center">
+
+            </div>
+        </>
     )
 }
 
