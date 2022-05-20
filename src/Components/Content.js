@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Responses from './Responses';
+
+
 const { Configuration, OpenAIApi } = require("openai");
 
 // fetch("https://api.openai.com/v1/engines/text-curie-001/completions", {
@@ -29,18 +32,18 @@ function Content() {
         apiKey: API_KEY,
       });
 
-    const openai = new OpenAIApi(configuration);
+    const openai = new OpenAIApi(configuration); 
   
     const [paramForm, setParamForm] = useState({
         prompt: "", 
         temperature: .7, 
         max_tokens: 25, 
     })
-
+    
+    const [responses, setResponses] = useState([]);
+    
     function handlePromptBlur(e) {
-        console.log(e.target); 
         const { name, value } = e.target; 
-        console.log(`name: ${name}, value ${value}`);
 
         setParamForm({...paramForm, [name]: value})
     }
@@ -57,8 +60,12 @@ function Content() {
         //     body: JSON.stringify(params),
         //     })
 
-        console.log(data);
-            
+        const response = data.data.choices[0].text;
+        
+        // responses.push(response);
+        
+        setResponses([...responses, response]);
+
     }
 
     async function handleClick(e) {
@@ -81,8 +88,14 @@ function Content() {
             <div className="container text-left"> 
                 <h1>Responses</h1>
             </div>
-            <div id="response-area" className="container text-center">
 
+            <div id="response-area" className="container text-center">
+                <ul>This is a list
+                   {responses.map(response => {
+                       return <li>{response}</li>
+                   })}
+                </ul>
+                
             </div>
         </>
     )
