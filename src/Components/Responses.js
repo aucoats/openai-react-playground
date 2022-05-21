@@ -2,19 +2,22 @@ import React from "react";
 
 
 function Responses(responses) {
-    
+
     const responseContent = responses || []; 
-   
+
     return (
 
-            <div id="response-area" className="container text-center">
-                <ul>This is a list
-                    {responseContent[0] && responseContent.forEach(response => 
-                        <li>{response}</li>
-                    )}
-                </ul>
-                
-            </div>
+        <div id="response-area" className="container text-center">
+            <ul>
+                {responseContent.map(response => {
+                    return <>
+                                <li key={response.response}>
+                                <span>Prompt: {response.input}</span>
+                                <span>Response: {response.response}</span></li>
+                            </>
+                })}
+            </ul>
+        </div>
     )
 }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+// import Responses from "./Responses";
 
 const { Configuration, OpenAIApi } = require("openai");
 
@@ -30,56 +30,59 @@ function Content() {
     const configuration = new Configuration({
         apiKey: API_KEY,
       });
-
     const openai = new OpenAIApi(configuration); 
   
+    // data to be sent to api 
     const [paramForm, setParamForm] = useState({
         prompt: "", 
         temperature: .7, 
         max_tokens: 25, 
     })
     
+    // responses and response manipulation for dom update
     const [responses, setResponses] = useState([]);
 
+    // for useEffect hook rerendering
+    const [count, setCount] = useState(0);
+
+    // gets responses from localStorage and rerenders
     useEffect(() => {
         console.log('getting responses from localStorage');
         const stored = localStorage.getItem("responses"); 
         if (!stored) {
-            setResponses();
+            setResponses([]);
         } else {
             setResponses(JSON.parse(stored));
         }
-    }, [])
+        
+    }, [count])
     
+
     function handlePromptBlur(e) {
         const { name, value } = e.target; 
 
         setParamForm({...paramForm, [name]: value})
     }
-
-    // function handleStore() {
-    //     localStorage.setItem("responses", JSON.stringify(responses));
-    // }
     
     async function handleFetch(params) {
         const data = await openai.createCompletion("text-curie-001", params);
-        
-        // await fetch("https://api.openai.com/v1/engines/text-curie-001/completions", {
-        //     method: "POST",
-        //     headers: {
-        //     "Content-Type": "application/json",
-        //     Authorization: `Bearer ${API_KEY}`,
-        //     },
-        //     body: JSON.stringify(params),
-        //     })
 
+        const input = JSON.parse(data.config.data).prompt;
         const response = data.data.choices[0].text;
-        
-        responses.push(response);
-        
-        setResponses([responses]);
 
+        const keyPair = { input , response }; 
+        
+        responses.push(keyPair);
+        
+        setResponses(responses);
         localStorage.setItem("responses", JSON.stringify(responses));
+
+        // resets form
+        setParamForm({
+            prompt: "", 
+            temperature: .7, 
+            max_tokens: 25,
+        })
 
     
     }
@@ -87,8 +90,8 @@ function Content() {
     async function handleClick(e) {
         e.preventDefault();
         const params = paramForm;
-
         handleFetch(params);
+        setCount(count+1);
     }
 
     return (
@@ -96,7 +99,7 @@ function Content() {
             <div className="container text-center">
                 <form>
                     <label className="align-self-start m-1">Enter prompt below</label><br></br>
-                    <textarea id="promptArea" name="prompt" className="align-self-center" onChange={(e) => handlePromptBlur(e)}></textarea><br></br>
+                    <textarea id="promptArea" name="prompt" className="align-self-center" onChange={(e) => handlePromptBlur(e)} value={paramForm.prompt}></textarea><br></br>
                     <button type="submit" className="btn btn-primary"
                         onClick={(e) => handleClick(e)}>Submit</button>
                 </form>
@@ -106,13 +109,16 @@ function Content() {
             </div>
 
             <div id="response-area" className="container text-center">
-                <ul>This is a list
-                   {responses.map(response => {
-                       return <li key={response}>{response}</li>
-                   })}
-                </ul>
-                
-            </div>
+            <ul>
+                {responses.map(response => {
+                    return <>
+                                <li key={response.response}>
+                                <span>Prompt: {response.input}</span>
+                                <span>Response: {response.response}</span></li>
+                            </>
+                })}
+            </ul>
+        </div>
         </>
     )
 }
