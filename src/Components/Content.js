@@ -59,9 +59,15 @@ function Content() {
     
 
     function handlePromptBlur(e) {
-        const { name, value } = e.target; 
+        let { name, value } = e.target; 
 
+        if (name === 'temperature') {
+            value = parseInt(value);
+        }
+       
         setParamForm({...paramForm, [name]: value})
+
+        console.log(paramForm);
     }
     
     async function handleFetch(params) {
@@ -97,23 +103,33 @@ function Content() {
     return (
         <>
             <div className="container text-center">
-                <form onSubmit={(e) => handleClick(e)}>
-                    <label className="align-self-start m-1">Enter prompt below</label><br></br>
-                    <input type="text" id="promptArea" name="prompt" className="align-self-center" onChange={(e) => handlePromptBlur(e)} value={paramForm.prompt}></input><br></br>
-                    <button type="submit" className="btn btn-primary"
-                        onClick={(e) => handleClick(e)}>Submit</button>
-                </form>
-            </div>
-            <div className="container text-left"> 
-                <h1>Responses</h1>
+                <div className="row">
+                    <div className="col container text-left m-2 p-2">
+                            <p>This is a testing ground for the <a href="https://beta.openai.com/docs/" target={"_blank"} rel={"noopener"}>OpenAI API</a> (specifically the <a href="https://beta.openai.com/docs/guides/completion" target={"_blank"} rel={"noopener"}>Completion API</a>). Enter a prompt to have the API complete your sentence. You can give it instructions, have it come up with lists, or have it respond to you conversationally. </p>
+                    </div>
+                    <form className="col" onSubmit={(e) => handleClick(e)}>
+                        <div className="input-group">
+                            <label className="input-group-text">Response randomness factor?</label>
+                            <input type={"number"} min={0} max={.9} step={.1} name="temperature" className="form-control align-self-center" onChange={(e) => handlePromptBlur(e)} value={paramForm.temperature}></input>
+                        </div>
+                        <div className="input-group">
+                            <label className="input-group-text">Your prompt: </label><br></br>
+                            <textarea type="text" id="promptArea" name="prompt" className="form-control align-self-center" onChange={(e) => handlePromptBlur(e)} value={paramForm.prompt}></textarea><br></br>
+                            <button type="submit" className="btn btn-primary"
+                                onClick={(e) => handleClick(e)}>Submit</button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
+                <h1 className="mt-3 text-center">Responses</h1>
+
             <div id="response-area" className="container text-center">
-            <ul>
+            <ul className="list-group">
                 {responses.map(response => {
                     return <>
-                                <li key={response.response}>
-                                <span>Prompt: {response.input}</span>
+                                <li key={response.response} className="list-group-item">
+                                <span>Prompt: {response.input}</span><br></br>
                                 <span>Response: {response.response}</span></li>
                             </>
                 })}
