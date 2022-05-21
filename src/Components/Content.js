@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Responses from './Responses';
 
 
 const { Configuration, OpenAIApi } = require("openai");
@@ -41,12 +40,26 @@ function Content() {
     })
     
     const [responses, setResponses] = useState([]);
+
+    useEffect(() => {
+        console.log('getting responses from localStorage');
+        const stored = localStorage.getItem("responses"); 
+        if (!stored) {
+            setResponses();
+        } else {
+            setResponses(JSON.parse(stored));
+        }
+    }, [])
     
     function handlePromptBlur(e) {
         const { name, value } = e.target; 
 
         setParamForm({...paramForm, [name]: value})
     }
+
+    // function handleStore() {
+    //     localStorage.setItem("responses", JSON.stringify(responses));
+    // }
     
     async function handleFetch(params) {
         const data = await openai.createCompletion("text-curie-001", params);
@@ -62,10 +75,13 @@ function Content() {
 
         const response = data.data.choices[0].text;
         
-        // responses.push(response);
+        responses.push(response);
         
-        setResponses([...responses, response]);
+        setResponses([responses]);
 
+        localStorage.setItem("responses", JSON.stringify(responses));
+
+    
     }
 
     async function handleClick(e) {
@@ -92,7 +108,7 @@ function Content() {
             <div id="response-area" className="container text-center">
                 <ul>This is a list
                    {responses.map(response => {
-                       return <li>{response}</li>
+                       return <li key={response}>{response}</li>
                    })}
                 </ul>
                 
