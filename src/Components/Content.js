@@ -97,9 +97,9 @@ function Content() {
     return (
         <>
             <div className="container text-center">
-                <form>
+                <form onSubmit={(e) => handleClick(e)}>
                     <label className="align-self-start m-1">Enter prompt below</label><br></br>
-                    <textarea id="promptArea" name="prompt" className="align-self-center" onChange={(e) => handlePromptBlur(e)} value={paramForm.prompt}></textarea><br></br>
+                    <input type="text" id="promptArea" name="prompt" className="align-self-center" onChange={(e) => handlePromptBlur(e)} value={paramForm.prompt}></input><br></br>
                     <button type="submit" className="btn btn-primary"
                         onClick={(e) => handleClick(e)}>Submit</button>
                 </form>
