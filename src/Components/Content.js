@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// import Responses from "./Responses";
 
 const { Configuration, OpenAIApi } = require("openai");
 
@@ -36,7 +35,7 @@ function Content() {
     const [paramForm, setParamForm] = useState({
         prompt: "", 
         temperature: .7, 
-        max_tokens: 25, 
+        max_tokens: 40, 
     })
     
     // responses and response manipulation for dom update
@@ -49,6 +48,7 @@ function Content() {
     useEffect(() => {
         console.log('getting responses from localStorage');
         const stored = localStorage.getItem("responses"); 
+        
         if (!stored) {
             setResponses([]);
         } else {
@@ -70,6 +70,34 @@ function Content() {
         console.log(paramForm);
     }
     
+    function handlePresets(e) {
+        if (e.target.name === "list") {
+            setParamForm(
+                { prompt: "Make a grocery list.", 
+                temperature: .7, 
+                max_tokens: 40, }
+            )
+        } else if (e.target.name === "instruction") {
+            setParamForm({
+                prompt: "How would one bake a cake?", 
+                temperature: 0, 
+                max_tokens: 40
+            })
+        } else if (e.target.name === "converse") {
+            setParamForm({
+                prompt: "Hello, how are you?", 
+                temperature: .5, 
+                max_tokens: 40
+            })
+        } else if (e.target.name === "horse") {
+            setParamForm({
+                prompt: "Please provide funny horse names that you would see in the Kentucky Derby.", 
+                temperature: .9, 
+                max_tokens: 40
+            })
+        }
+    }
+
     async function handleFetch(params) {
         const data = await openai.createCompletion("text-curie-001", params);
 
@@ -78,7 +106,9 @@ function Content() {
 
         const keyPair = { input , response }; 
         
-        responses.push(keyPair);
+        // responses.push(keyPair);
+
+        responses.unshift(keyPair);
         
         setResponses(responses);
         localStorage.setItem("responses", JSON.stringify(responses));
@@ -102,10 +132,12 @@ function Content() {
 
     return (
         <>
-            <div className="container text-center">
+            <section className="container text-center">
                 <div className="row">
                     <div className="col container text-left m-2 p-2">
-                            <p>This is a testing ground for the <a href="https://beta.openai.com/docs/" target={"_blank"} rel={"noopener"}>OpenAI API</a> (specifically the <a href="https://beta.openai.com/docs/guides/completion" target={"_blank"} rel={"noopener"}>Completion API</a>). Enter a prompt to have the API complete your sentence. You can give it instructions, have it come up with lists, or have it respond to you conversationally. </p>
+                            <p>This is a testing ground for the <a href="https://beta.openai.com/docs/" className="link-info" target={"_blank"} rel={"noreferrer"}>OpenAI API</a> (specifically the <a href="https://beta.openai.com/docs/guides/completion" className="link-info" target={"_blank"} rel={"noreferrer"}>Completion API</a>). 
+                            Enter a prompt to have the API complete your sentence. You can give it instructions, have it come up with lists, or have it respond to you conversationally.
+                            Give it a shot! Adjust your randomness factor and enter a prompt, or use one of the buttons below for example prompts! </p>
                     </div>
                     <form className="col" onSubmit={(e) => handleClick(e)}>
                         <div className="input-group">
@@ -120,21 +152,45 @@ function Content() {
                         </div>
                     </form>
                 </div>
-            </div>
+            </section>
+
+            <section className="row text-center mt-2 mx-5 px-5">
+                <button name="list" className="col btn btn-info p-1 mx-2"
+                    onClick={(e) => handlePresets(e)}>Make a list!</button>
+                <button name="instruction" className="col btn btn-info p-1 mx-2"
+                    onClick={(e) => handlePresets(e)}>Give instructions!</button>
+                <button name="converse" className="col btn btn-info p-1 mx-2"
+                    onClick={(e) => handlePresets(e)}>Have a conversation?</button>
+                <button name="horse" className="col btn btn-info p-1 mx-2"
+                    onClick={(e) => handlePresets(e)}>Kentucky Derby?</button>
+            </section>
 
                 <h1 className="mt-3 text-center">Responses</h1>
 
-            <div id="response-area" className="container text-center">
-            <ul className="list-group">
-                {responses.map(response => {
-                    return <>
-                                <li key={response.response} className="list-group-item">
-                                <span>Prompt: {response.input}</span><br></br>
-                                <span>Response: {response.response}</span></li>
-                            </>
-                })}
-            </ul>
-        </div>
+            <section id="response-area" className="container">
+                <ul className="list-group">
+                    {responses.map(response => {
+                        return <>
+                                    <li key={response.response} 
+                                    className="list-group-item bg-success bg-opacity-25
+                                    border-0 m-2">
+                                        <div className="row text-left fs-6 fw-bold m-1">
+                                            <span>You entered:</span>
+                                        </div>
+                                        <div className="row text-center fs-5 m-1">
+                                            <span>{response.input}</span>
+                                        </div>
+                                        <div className="row text-left fs-6 fw-bold m-1">
+                                            <span>OpenAI responded with:</span>
+                                        </div>
+                                        <div className="row text-center fs-5 fst-italic m-1">
+                                            <span>{response.response}</span>
+                                        </div>
+                                    </li>
+                                </>
+                    })}
+                </ul>
+            </section>
         </>
     )
 }
